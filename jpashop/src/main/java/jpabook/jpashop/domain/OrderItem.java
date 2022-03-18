@@ -1,13 +1,16 @@
 package jpabook.jpashop.domain;
 
 import jpabook.jpashop.domain.item.Item;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
 
 @Entity
 @Getter @Setter
+@NoArgsConstructor(access = AccessLevel.PROTECTED) //외부에서 생성막음
 public class OrderItem {
 
     @Id @GeneratedValue
@@ -24,4 +27,27 @@ public class OrderItem {
 
     private int orderPrice;// 주문 가격
     private int count; //주문 수량
+
+    //생성 메서드(오직 한 방법으로만 생성하게하는게 유지보수에 좋음)
+    public static OrderItem createOrderItem(Item item,int orderPrice, int count){
+        OrderItem orderItem = new OrderItem();
+        orderItem.setItem(item);
+        orderItem.setOrderPrice(orderPrice);
+        orderItem.setCount(count);
+
+        item.removeStock(count);
+        return orderItem;
+    }
+
+    //비즈니스 로직
+
+    //주문취소시 상품갯수 원상복구
+    public void cancel(){
+        getItem().addStock(count);
+    }
+
+    //조회 로직(전체 가격)
+    public int getTotalPrice(){
+        return getOrderPrice()*getCount();
+    }
 }
