@@ -20,6 +20,7 @@ public class ItemRepository {
             em.persist(item);
         }else{
             em.merge(item);
+            //merge는 준영속 상태의 엔티티를 영속상태로 변경할 때 사용하는 기능, 하지만 모든 필드를 업데이트해서 값이 없으면 null로 갈아치워질수도 있어서 위험
         }
     }
 
