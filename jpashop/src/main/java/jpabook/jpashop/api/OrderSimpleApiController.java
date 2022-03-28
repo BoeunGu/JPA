@@ -6,6 +6,7 @@ import jpabook.jpashop.domain.Order;
 import jpabook.jpashop.domain.OrderStatus;
 import jpabook.jpashop.repository.OrderRepository;
 import jpabook.jpashop.repository.OrderSearch;
+import jpabook.jpashop.repository.OrderSimpleQueryDto;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -42,6 +43,11 @@ public class OrderSimpleApiController {
     }
 
 
+    /**
+     * V2 단점 : 지연로딩으로 쿼리 N번 호출
+     * 쿼리가 총 1+N+N번 실행된다.
+     * @return
+     */
     @GetMapping("/api/v2/simple-orders")
     public List<SimpleOrderDto> orderV2(){
         List<Order> orders = orderRepository.findAllByString(new OrderSearch());
@@ -50,8 +56,39 @@ public class OrderSimpleApiController {
                 .collect(Collectors.toList());
     }
 
+
+    /**
+     *V3 엔티티를 조회해서 DTO로 변환(fetch join사용) -> 쿼리 1번 호출
+     *
+     * @return
+     */
+    @GetMapping("/api/v3/simple-orders")
+    //V2와 같지만 나가는 쿼리가 다름
+    public List<SimpleOrderDto> orderV3(){
+
+        List<Order> orders = orderRepository.findAllWithMemberDelivery();
+        List<SimpleOrderDto> result = orders.stream()
+                .map(o -> new SimpleOrderDto(o))
+                .collect(Collectors.toList());
+        return result;
+    }
+
+
+    /**
+     * V4 잘안씀 / 성능상 V3보다 좋음, 그렇게 차이는 안남
+     * @return
+     */
+//    @GetMapping("/api/v4/simple-orders")
+//    public List<OrderSimpleQueryDto> orderV4(){
+//        return orderRepository.findOrderDtos();
+//
+//
+//    }
+
+
     @Data
     static class SimpleOrderDto{
+        //V2에서 쓰는것
         private Long orderId;
         private String name;
         private LocalDateTime orderDate;
