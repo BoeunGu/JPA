@@ -9,6 +9,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import javax.xml.transform.Result;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
@@ -59,6 +62,43 @@ public class MemberApiController {
     public UpdateMemberResponse updateMemberV2(@PathVariable("id")Long id,
                                                @RequestBody @Valid UpdateMemberRequest request){
 
+        memberService.update(id,request.getName());
+        Member findMember = memberService.findOne(id);
+
+        return new UpdateMemberResponse(findMember.getId(), findMember.getName());
+    }
+
+    /**
+     * 회원조회
+     */
+
+    @GetMapping("/api/v1/members") //엔티티를 그대로 반환해서 외부에 정보가 그대로 노출됨 -> api형식이 깨짐
+    public List<Member> membersV1(){
+        return memberService.findMembers();
+    }
+
+    @GetMapping("/api/v2/members")
+    public Result memberV2(){
+        List<Member> findMembers = memberService.findMembers();
+        List<MemberDto> collect=findMembers.stream()//stream형식으로 바꿈
+                .map(m-> new MemberDto(m.getName()))
+                .collect(Collectors.toList());//stream -> list 형식으로 바꿔줌
+
+        return new Result(collect);
+
+
+    }
+
+    @Data
+    @AllArgsConstructor
+    static class Result<T>{
+        private T data;
+    }
+
+    @Data
+    @AllArgsConstructor
+    static class MemberDto{
+        private String name;
     }
 
     @Data

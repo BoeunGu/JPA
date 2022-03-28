@@ -46,4 +46,10 @@ public class MemberService {
     public Member findOne(Long memberId){
         return memberRepository.findOne(memberId);
     }
+
+    @Transactional
+    public void update(Long id, String name){
+        Member member = memberRepository.findOne(id); //DB에서 영속성 컨텍스트 반납
+        member.setName(name);// flush -> commit 되는 시점
+    }
 }
