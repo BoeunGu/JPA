@@ -12,6 +12,8 @@ spring:
       hibernate:
 #        show_sql: true //시스템아웃에 찍힘
        format_sql: true
+       #ToOne관계에서 페이징처리를 위함 (쿼리에서 IN 사용)
+       default_batch_fetch_size: 100
 
 
 logging:

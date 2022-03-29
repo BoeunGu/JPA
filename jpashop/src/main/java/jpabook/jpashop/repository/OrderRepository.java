@@ -70,6 +70,31 @@ public class OrderRepository {
 
     }
 
+    public List<Order> findAllWithItem(){
+        //결론적으론 join으로 인해서 4개의 Order가 반환됨 (1:N의 경우 N만큼 데이터가 나오게됨)
+        return em.createQuery("select distinct o from Order o"+
+                        //distinct의 기능 1)DB에 distinct을 포함해서 날려준다.(DB에서는 row의 값들이 완전히 일치해야 중복제거를 해주어서 여기선 의미가 없다.)
+                        // 2) 데이터들을 WAS에 들고온 뒤 한번 더 distinct를 처리해주어 root(Order에 해당)이 중복일 때 걸러서 컬렉션에 담아 준다.
+                " join fetch o.member m"+
+                " join fetch o.delivery d"+
+                " join fetch o.orderItems oi"+
+                " join fetch oi.item i",Order.class)
+                .getResultList();
+        )
+    }
+
+    public List<Order> findAllWithMemberDelivery(int offset, int limit) {
+        return em.createQuery("select o from Order o"+
+                        "join fetch o.member m" +
+                        "join fetch o.delivery d",Order.class)
+                .setFirstResult(offset)
+                .setMaxResults(limit)
+                .getResultList();
+
+
+
+    }
+
 //
 //    public List<OrderSimpleQueryDto> findOrderDtos() {
 //        return em.createQuery("select new jpabook.jpashop.repository.OrderSimpleQueryDto(o.id,m.name,o.orderdate,o.status,d.address)"+
