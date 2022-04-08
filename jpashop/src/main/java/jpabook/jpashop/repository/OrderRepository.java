@@ -80,7 +80,7 @@ public class OrderRepository {
                 " join fetch o.orderItems oi"+
                 " join fetch oi.item i",Order.class)
                 .getResultList();
-        )
+
     }
 
     public List<Order> findAllWithMemberDelivery(int offset, int limit) {
